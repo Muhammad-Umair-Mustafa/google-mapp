@@ -5,20 +5,20 @@ import re
 
 app = FastAPI()
 
-GOOGLE_MAPS_BASE_URL = "https://www.google.com/maps/place/?q=place_id:{}"
+GOOGLE_MAPS_BASE_URL = "https://www.google.com/maps?cid={}""
 
-# Function to extract Place ID from Google Maps URL
-def extract_place_id(map_url: str) -> str:
-    match = re.search(r'!3d([-\d.]+)!4d([-\d.]+)', map_url)
+# Function to extract CID from Google Maps URL
+def extract_cid(map_url: str) -> str:
+    match = re.search(r'cid=(\d+)', map_url)
     if not match:
         raise HTTPException(status_code=400, detail="Invalid Google Maps URL")
-    return match.group(0)  # Extracted Place ID
+    return match.group(1)  # Extracted CID
 
 @app.get("/scrape")
 def scrape_website(map_url: str = Query(..., title="Google Maps URL")):
     try:
-        place_id = extract_place_id(map_url)
-        url = GOOGLE_MAPS_BASE_URL.format(place_id)
+        cid = extract_cid(map_url)
+        url = GOOGLE_MAPS_BASE_URL.format(cid)
         headers = {"User-Agent": "Mozilla/5.0"}
         
         response = requests.get(url, headers=headers)
